@@ -1,0 +1,32 @@
+{
+    "id": "71e37c54",
+    "name": "Astui for Adobe XD",
+    "description": "Astui for Adobe XD",
+    "icons": [{
+        "width": 80,
+        "height": 80,
+        "path": "images/icon.png"
+    }],
+    "version": "1.0.1",
+    "host": {
+        "app": "XD",
+        "minVersion": "8.0"
+    },
+    "uiEntryPoints": [{
+        "type": "menu",
+        "label": "Astui for Adobe XD",
+        "menuItems": [{
+                "type": "menu",
+                "label": "Smart Point Remove",
+                "commandId": "optionLoad"
+            },
+            {
+                "type": "menu",
+                "label": "Move Points to Tangencies",
+                "commandId": "moveTangencies"
+            }
+        ]
+    }]
+
+
+}
