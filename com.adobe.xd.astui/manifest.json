@@ -7,7 +7,7 @@
         "height": 80,
         "path": "images/icon.png"
     }],
-    "version": "1.0.1",
+    "version": "1.0.2",
     "host": {
         "app": "XD",
         "minVersion": "8.0"

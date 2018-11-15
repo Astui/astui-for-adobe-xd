@@ -384,6 +384,7 @@ function tangenciesProcessor(selection) {
     if (selectedGrid.length > 1) {
         let rand;
         do {
+            commands.convertToPath();
             commands.ungroup();
             rand++;
         } while (rand < 4);
@@ -391,6 +392,8 @@ function tangenciesProcessor(selection) {
         let paths = getPathData(selection);
         return sendComplexTangencies(selection, paths);
     } else {
+
+        commands.convertToPath();
         return sendSimpleTangencies(selection);
     }
 }
@@ -461,6 +464,7 @@ function getAllPath(selection, value) {
         let paths = getPathData(selection);
         return redrawComplexPath(selection, paths, value);
     } else {
+        commands.convertToPath();
         return optimise(selection, value);
     }
 }
