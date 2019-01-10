@@ -7,7 +7,7 @@
         "height": 80,
         "path": "images/icon.png"
     }],
-    "version": "1.0.2",
+    "version": "1.1.0",
     "host": {
         "app": "XD",
         "minVersion": "8.0"
@@ -24,7 +24,18 @@
                 "type": "menu",
                 "label": "Move Points to Tangencies",
                 "commandId": "moveTangencies"
+            },
+            {
+                "type": "menu",
+                "label": "Offset Path",
+                "commandId": "offsetPath"
+            },
+            {
+                "type": "menu",
+                "label": "Outline Stroke",
+                "commandId": "outlineStroke"
             }
+            
         ]
     }]
 

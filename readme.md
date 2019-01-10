@@ -11,5 +11,8 @@ _This plugin has no dependencies yet._
 
 ## Obtaining the API token
 
-Register and log-in to [Astui](https://astui.tech/). Click on the **API** submenu. Create your token. Keep it safe.
+Register and log-in to [Astui](https://astui.tech/). Click on the **API** submenu. Create your token. Keep it safe. 
+The last token is also available on [Astui Setting's Page](https://astui.tech/settings) when you're logged in.
+
+
 
