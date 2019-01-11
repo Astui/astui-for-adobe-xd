@@ -5,34 +5,12 @@ const {
 //kindly provided by Сameron, don't need to parse JSON, so leaving this as a string
 const {
     storage
-} = require('uxp');
-const {
-    localFileSystem: fs
-} = storage;
+} = require("uxp");
+const environment = require('./lib/storage-helper')
 const commands = require("commands");
-const API_FILE = 'api.json'; //path to settings file
+
 //setting/creating new api file
-const setApiToken = function (input = 'n/a') {
-    return fs
-        .getDataFolder()
-        .then(folder => folder.createEntry(API_FILE, {
-            overwrite: true
-        }))
-        .then(file => file.write(input))
-        .catch(function (error) {
-            console.log("Token setting" + error);
-        });
-};
-//getting the contents of the api file
-const getApiToken = function () {
-    return fs
-        .getDataFolder()
-        .then(folder => folder.getEntry(API_FILE))
-        .then(file => file.read())
-        .catch(function (error) {
-            console.log("Token getting " + error);
-        });
-};
+
 
 //defining the selection const
 const $ = sel => document.querySelector(sel);
@@ -44,11 +22,23 @@ let alertMessage;
  * @NOTE: API RELATED 
  */
 
-const spr = "https://astui.tech/api/v1/spr";
-const tangencies = "https://astui.tech/api/v1/tangencies";
-const validate = "https://astui.tech/api/v1/validate";
-const outline = "https://astui.tech/api/v1/outline";
-const offset = "https://astui.tech/api/v1/offset";
+// (async function(){
+//     const env = await environment.set("server", );
+//     if (!env) {
+//         await setEnv();
+//     }
+// })();
+
+let spr = gettingEndpoints("spr");
+let tangencies = gettingEndpoints("tangencies");
+let validate = gettingEndpoints("validate");
+let outline =  gettingEndpoints("outline");
+let offset =  gettingEndpoints("offset");
+
+async function gettingEndpoints(operation) {
+    const url = await environment.get('server', 'https://astui.tech/api/v1/');
+    return url + operation;
+}
 
 /**
  * ESSENTIAL CALL TO THE API
@@ -58,7 +48,7 @@ const offset = "https://astui.tech/api/v1/offset";
  */
 async function checkAuth(token) {
     //doesn't handle any errors, handled by the dialogue.
-    const authentication = await fetch(validate, {
+    const authentication = await fetch(await validate, {
         method: "post",
         headers: {
             "Cache-Control": "no-cache",
@@ -83,10 +73,11 @@ async function checkAuth(token) {
  */
 async function sprCallToApi(body, accuracy) {
     //get api_token
-    const api_token = await getApiToken();
-
+    const api_token = await environment.get("api_token");
+    const endpoint = await spr;
     //waiting for the request to complete
-    let response = await fetch(spr, {
+    let response = await fetch(endpoint, {
+        
         method: "post",
         headers: {
             "Cache-Control": "no-cache",
@@ -107,7 +98,7 @@ async function sprCallToApi(body, accuracy) {
     } else {
         if ((status == 401) || (status == 402)) {
             //expired and unauthed errors, need the file to be writable, hence setting it to nothing
-            await setApiToken();
+            await environment.set("api_token","");
             error = "Unauthorised or expired. Check your token.";
         }
 
@@ -131,9 +122,9 @@ async function sprCallToApi(body, accuracy) {
  */
 async function callToTangenciesApi(body) {
     //get api_token
-    const api_token = await getApiToken();
+    const api_token = await environment.get('api_token');
     //waiting for the request to complete
-    let response = await fetch(tangencies, {
+    let response = await fetch(await tangencies, {
         method: "post",
         headers: {
             "Cache-Control": "no-cache",
@@ -151,7 +142,7 @@ async function callToTangenciesApi(body) {
     } else {
         //a bit of error handling, when we process a f
         if ((status == 401) || (status == 402)) {
-            await setApiToken();
+            await environment.set("api_token","");
             error = "Unauthorised or expired. Check your token.";
         }
 
@@ -174,24 +165,18 @@ async function callToTangenciesApi(body) {
  */
 async function callToOffsetApi(body, setting) {
     //get api_token
-    const api_token = await getApiToken();
+    const api_token = await environment.get('api_token');
     const width = setting.width;
     const cornerType = setting.corner;
-    let content;
-    if (cornerType == "miter") {
-        content = "api_token=" + api_token + "&path=" + body + "&offset=" + width + "&join_type=" + cornerType + "&mitre_limit=" + setting.limit;
-    } else {
-        content = "api_token=" + api_token + "&path=" + body + "&offset=" + width + "&join_type=" + cornerType;
-    }
     //waiting for the request to complete
-    let response = await fetch(offset, {
+    let response = await fetch(await offset, {
         method: "post",
         headers: {
             "Cache-Control": "no-cache",
             "Content-Type": "application/x-www-form-urlencoded",
             "Accept": "application/json"
         },
-        body: content,
+        body: "api_token=" + api_token + "&path=" + body + "&offset=" + width + "&join_type=" + cornerType,
     });
     const status = response.status;
     let error = response.statusText;
@@ -202,7 +187,7 @@ async function callToOffsetApi(body, setting) {
     } else {
         //a bit of error handling, when we process a f
         if ((status == 401) || (status == 402)) {
-            await setApiToken();
+            await environment.set("api_token","");
             error = "Unauthorised or expired. Check your token.";
         }
 
@@ -225,7 +210,7 @@ async function callToOffsetApi(body, setting) {
 async function callToOutlineStrokeApi(path) {
 
     //get api_token
-    const api_token = await getApiToken();
+    const api_token = await environment.get("api_token");
     const width = path.width;
     const cap = path.cap_type;
     const join = path.join_type;
@@ -248,7 +233,7 @@ async function callToOutlineStrokeApi(path) {
     }
 
 
-    let response = await fetch(outline, {
+    let response = await fetch(await outline, {
         method: "post",
         headers: {
             "Cache-Control": "no-cache",
@@ -271,7 +256,7 @@ async function callToOutlineStrokeApi(path) {
     } else {
         //a bit of error handling, when we process a f
         if ((status == 401) || (status == 402)) {
-            await setApiToken();
+            await environment.set("api_token","");
             error = "Unauthorised or expired. Check your token.";
         }
 
@@ -364,7 +349,7 @@ function insertApiKey(id = "api") {
     apiInput.addEventListener("keydown", e => {
         if (e.keyCode == 27) {
             e.preventDefault();
-            apiInput.close('n/a');
+            apiInput.close("n/a");
         }
         if (e.keyCode == 13) {
             e.preventDefault();
@@ -541,7 +526,7 @@ function offsetDialogue(id = "offset") {
     position.selectedIndex = 0;
     //populating the settings options that will be passed to be processed with the path at a later stage
     const submit = () => {
-    
+
         //passing the full integer to resolve the closure
         let settings = {
             "width": Math.round(width.value),
@@ -565,7 +550,7 @@ function offsetDialogue(id = "offset") {
     if (type.value == "miter") {
         limit.disabled = false;
         limit.value = 20;
-    } 
+    }
 
     type.addEventListener("change", e => {
         e.preventDefault();
@@ -575,7 +560,7 @@ function offsetDialogue(id = "offset") {
         } else {
 
             limit.disabled = true;
-            limit.value = '';
+            limit.value = "";
         }
     });
     //on submit it submits the form 
@@ -675,11 +660,11 @@ function offsetProcessor(setting) {
         } while (rand < 4);
 
         let paths = getPathData();
-        return sendComplexOffset( setting, paths);
+        return sendComplexOffset(setting, paths);
     } else {
 
         commands.convertToPath();
-        return sendSimpleOffset( setting);
+        return sendSimpleOffset(setting);
     }
 }
 /**
@@ -898,7 +883,7 @@ async function optimise(optionSetting) {
 
     //running the request to the server
     return sprCallToApi(pathData, optionSetting)
-        .then(data => redrawPath( data))
+        .then(data => redrawPath(data))
         .catch(function (error) {
             document.body.appendChild(createAlert("Astui returned: " + error)).showModal();
         });
@@ -911,7 +896,7 @@ async function optimise(optionSetting) {
  * @param {*} selection 
  * @param {*} data 
  */
-function redrawFromStrokes( data) {
+function redrawFromStrokes(data) {
     commands.convertToPath();
     selection.items.forEach(function (element) {
         if (data.error) {
@@ -933,7 +918,7 @@ function redrawFromStrokes( data) {
  * @param {*} original - indication if we keep the original path or not
  * @param {*} position - if we keep the original path, how do we place it 
  */
-function redrawPath( data, original = true, position = null) {
+function redrawPath(data, original = true, position = null) {
     //need to loop through each selected element and reset the pathData property
     if (original === true) {
         selection.items.forEach(function (element) {
@@ -1052,7 +1037,7 @@ function defineStrokePlacementNameForApi(stroke) {
  * @param {*} array
  * @param {*} value
  */
-function redrawComplexPath( array, value) {
+function redrawComplexPath(array, value) {
     let newPaths = new Array; //array of said requests
     array.forEach(async function (element) {
         newPaths.push(sprCallToApi(element.path, value));
@@ -1061,7 +1046,7 @@ function redrawComplexPath( array, value) {
     //modifications to the sceneGraph have to be async (plus it's an async request anyway, returning a promise)
     //that sends a further array to placeMultiplePaths method
     return Promise.all(newPaths)
-        .then(data => placeMultiplePaths( data))
+        .then(data => placeMultiplePaths(data))
         .catch(function (error) {
             document.body.appendChild(createAlert("Astui returned: " + error)).showModal();
         });
@@ -1074,8 +1059,8 @@ function redrawComplexPath( array, value) {
  * @param {*} selection 
  * @param {*} path - response with path and colour
  */
-function placeMultipleStrokes( path) {
- 
+function placeMultipleStrokes(path) {
+
     commands.convertToPath();
     const node = selection.items;
 
@@ -1088,7 +1073,7 @@ function placeMultipleStrokes( path) {
         childNode.strokeEnabled = false;
         childNode.fillEnabled = true;
         childNode.fill = path[i].color;
-        
+
     });
 }
 /**
@@ -1099,7 +1084,7 @@ function placeMultipleStrokes( path) {
  * @param {boolean} original 
  * @param {*} position  
  */
-function placeMultiplePaths( path, original = true, position) {
+function placeMultiplePaths(path, original = true, position) {
     const node = selection.items; //getting array of current paths
     //reset their pathData
     if (original === true) {
@@ -1128,6 +1113,9 @@ function placeMultiplePaths( path, original = true, position) {
                 childNode.pathData = path[i].path;
             }
         });
+
+
+
 
     }
 }
@@ -1162,7 +1150,7 @@ async function selectionInit() {
         const r = await dialog.showModal();
         if (r) {
             //need to return a promise, returning a paths calculation method
-            return getAllPath( r);
+            return getAllPath(r);
         }
     } catch (err) {
         console.log("ESC dismissed dialog", +err);
@@ -1188,7 +1176,7 @@ function strokeProcessor() {
         } while (rand < 4);
 
         let paths = getPathDataStroke();
-        return sendComplexStroke( paths);
+        return sendComplexStroke(paths);
     } else {
 
         return sendSimpleStroke();
@@ -1208,7 +1196,7 @@ async function otherSelection() {
         const r = await dialog.showModal();
         if (r) {
             //need to return a promise, returning a paths calculation method
-            return offsetProcessor( r);
+            return offsetProcessor(r);
         }
     } catch (err) {
         console.log("ESC dismissed dialog", +err);
@@ -1225,7 +1213,7 @@ async function apiCheckSpr() {
     if (selection.items[0] == null) {
         document.body.appendChild(createAlert("Oh no! You haven't selected anything.")).showModal();
     } else {
-        const apiCheck = await getApiToken();
+        const apiCheck = await environment.get("api_token");
         if ((!apiCheck) || (apiCheck == 'n/a')) {
             return createApiDialogue();
         } else {
@@ -1243,7 +1231,7 @@ async function createApiDialogue() {
     //waiting for the dialog to close and provide with accuracy value if said is set
     const r = await dialog.showModal();
     if (r !== "n/a") {
-        await setApiToken(r);
+        await environment.set("api_token", r);
         return await selectionInit();
     }
 }
@@ -1257,14 +1245,14 @@ async function apiCheckTangencies() {
     if (selection.items[0] == null) {
         document.body.appendChild(createAlert("Oh no! You haven't selected anything.")).showModal();
     } else {
-        const apiCheck = await getApiToken();
+        const apiCheck = await environment.get("api_token");
         if ((!apiCheck) || (apiCheck == 'n/a')) {
             const dialog = insertApiKey();
             try {
                 //waiting for the dialog to close and provide with accuracy value if said is set
                 const r = await dialog.showModal();
                 if (r) {
-                    await setApiToken(r);
+                    await environment.set("api_token", r);
                     return await tangenciesProcessor();
                 }
             } catch (err) {
@@ -1286,14 +1274,14 @@ async function apiCheckStroke() {
     if (selection.items[0] == null) {
         document.body.appendChild(createAlert("Oh no! You haven't selected anything.")).showModal();
     } else {
-        const apiCheck = await getApiToken();
+        const apiCheck = await environment.get("api_token");
         if ((!apiCheck) || (apiCheck == 'n/a')) {
             const dialog = insertApiKey();
             try {
                 //waiting for the dialog to close and provide with accuracy value if said is set
                 const r = await dialog.showModal();
                 if (r) {
-                    await setApiToken(r);
+                    await environment.set("api_token", r);
                     return await strokeProcessor();
                 }
             } catch (err) {
@@ -1315,7 +1303,7 @@ async function apiCheckOffset() {
         document.body.appendChild(createAlert("Oh no! You haven't selected anything.")).showModal();
     } else {
 
-        const apiCheck = await getApiToken();
+        const apiCheck = await environment.get("api_token");
         if ((!apiCheck) || (apiCheck == 'n/a')) {
             return createOtherApiDialog();
         } else {
@@ -1335,7 +1323,7 @@ async function createOtherApiDialog() {
     //waiting for the dialog to close and provide with accuracy value if said is set
     const r = await dialog.showModal();
     if (r !== "n/a") {
-        await setApiToken(r);
+        await environment.set("api_token", r);
         return await otherSelection();
     }
 }

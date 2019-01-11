@@ -15,4 +15,8 @@ Register and log-in to [Astui](https://astui.tech/). Click on the **API** submen
 The last token is also available on [Astui Setting's Page](https://astui.tech/settings) when you're logged in.
 
 
+## Dependencies
+
+[XD-Storage-Helper](https://github.com/pklaschka/xd-storage-helper) is used to manage the settings file.
+
 
