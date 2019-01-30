@@ -168,6 +168,13 @@ async function callToOffsetApi(body, setting) {
     const api_token = await environment.get('api_token');
     const width = setting.width;
     const cornerType = setting.corner;
+    const limit = setting.limit;
+    let content;
+    if (limit) {
+        content = "api_token=" + api_token + "&path=" + body + "&offset=" + width + "&join_type=" + cornerType + "&mitre_limit=" + limit;
+    } else {
+        content = "api_token=" + api_token + "&path=" + body + "&offset=" + width + "&join_type=" + cornerType;
+    }
     //waiting for the request to complete
     let response = await fetch(await offset, {
         method: "post",
@@ -176,7 +183,7 @@ async function callToOffsetApi(body, setting) {
             "Content-Type": "application/x-www-form-urlencoded",
             "Accept": "application/json"
         },
-        body: "api_token=" + api_token + "&path=" + body + "&offset=" + width + "&join_type=" + cornerType,
+        body: content,
     });
     const status = response.status;
     let error = response.statusText;
@@ -386,7 +393,11 @@ function createOptions(id = "options") {
         width: 300px;
     }
     .hint {
+        margin-top: 10px;
         font-size: 10px;
+    }
+    .padding {
+        padding-left: 5px;
     }
 </style>
 <dialog id="${id}">
@@ -394,11 +405,11 @@ function createOptions(id = "options") {
         <h1>Smart Point Remove</h1>
         <label>
             <span>Set your Smart Point Removal tolerance:</span>
-            <input type="range" min="1" max="100" value="30" id="accuracy" />
-            <div>
-             <div id="tolerance_value">30</div>
+            <input type="range" min="1" max="100" value="15" id="accuracy" />
+            <div class="padding">
+             <div id="tolerance_value">15</div>
              </div>
-             <div class="hint">Hint: a minimum tolerance of 1 maintains the path shape but removes very few points. The maximum tolerance of 100 removes many more points but can distort the shape. Try starting with a tolerance of 30 for good results.
+             <div class="hint padding">Hint: a minimum tolerance of 1 maintains the path shape but removes very few points. The maximum tolerance of 100 removes many more points but can distort the shape. Try starting with a tolerance of 30 for good results.
             </div>
         </label>
         <footer>
@@ -423,14 +434,8 @@ function createOptions(id = "options") {
     cancel.addEventListener("click", () => {
         options.close();
     });
-    form.addEventListener("keydown", () => {
-        if (e.keyCode == 27) {
-            e.preventDefault();
-            options.close();
-        }
-    });
     //when the slider changes it calls the roundParameters method
-    accuracy.addEventListener("change", e => {
+    accuracy.addEventListener("input", e => {
         roundParameters(accuracy);
         e.preventDefault();
     });
@@ -1148,7 +1153,7 @@ async function selectionInit() {
     try {
         //waiting for the dialog to close and provide with accuracy value if said is set
         const r = await dialog.showModal();
-        if (r) {
+        if ((r) && (r !== "reasonCanceled")) {
             //need to return a promise, returning a paths calculation method
             return getAllPath(r);
         }
@@ -1194,7 +1199,7 @@ async function otherSelection() {
     try {
         //waiting for the dialog to close and provide with accuracy value if said is set
         const r = await dialog.showModal();
-        if (r) {
+        if ((r) && (r !== "reasonCanceled")) {
             //need to return a promise, returning a paths calculation method
             return offsetProcessor(r);
         }
