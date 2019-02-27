@@ -1,20 +1,20 @@
 {
-    "id": "71e37c54",
-    "name": "Astui for Adobe XD",
-    "description": "Astui for Adobe XD",
+    "id": "8a99fe4d",
+    "name": "Astui",
+    "description": "Astui",
     "icons": [{
         "width": 80,
         "height": 80,
         "path": "images/icon.png"
     }],
-    "version": "1.1.1",
+    "version": "1.2.2",
     "host": {
         "app": "XD",
         "minVersion": "8.0"
     },
     "uiEntryPoints": [{
         "type": "menu",
-        "label": "Astui for Adobe XD",
+        "label": "Astui",
         "menuItems": [{
                 "type": "menu",
                 "label": "Smart Point Remove",
