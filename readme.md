@@ -1,12 +1,27 @@
 # Astui for Adobe XD
 
-_This plugin has no dependencies yet._
-
-## Usage
+## Installation
 
 1. Download / clone this repo
 2. Zip up the plugin folder (com.adobe.xd.astui) and rename the extension to "xdx".
 3. Double click on the package and it's installed.
+
+### Alternatively:
+
+Find our plugin in **Plugins -> Discover -> Astui**
+
+## Usage
+Documentation for the API itself - [Astui API Documentation](http://astui.tech/docs/api/#introduction)
+
+Each operation has been extracted into their own module.
+
+**Smart Point Removal** - processed your selection and removes unnecessary points ensuring your artwork is still editable.
+
+**Move Points To Tangencies** - moves points by 90°.
+
+**Offset Paths** - allows to offset paths but offset limit and the path type, as well as keeping the original path on the screen. _More information to come_
+
+**Outline Strokes** - creates paths out of strokes on the selection.
 
 
 ## Obtaining the API token
