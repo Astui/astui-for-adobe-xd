@@ -2,6 +2,7 @@
 const {
     selection
 } = require("scenegraph");
+const commands = require("commands");
 const environment = require("./lib/storage-helper");
 const svgHelper = require("./lib/svg-helper");
 const smartPointRemoval = require("./lib/smart-point-removal");
@@ -208,19 +209,20 @@ async function apiCheckSpr() {
     if (selection.items[0] == null) {
         document.body.appendChild(createAlert("Oh no! You haven't selected anything.")).showModal();
     } else {
-        const size = calculatePaths();
+        const size = calculcatePathsAndPoints();
         if (size) {
-            const apiCheck = await environment.get("api_token");
+            const apiCheck = await environment.get("api_token","");
             smartPointRemoval.setEndpoint(await spr);
-
+          
             if ((apiCheck == "") || (apiCheck == "reasonCanceled")) {
-                return createApiDialogue().then(data => smartPointRemoval.setToken(data))
+
+                return await createApiDialogue().then(data => smartPointRemoval.setToken(data))
                     .then(data => smartPointRemoval.processData())
                     .catch(error => document.body.appendChild(createAlert(error)).showModal());
             } else {
                 
                 //sets the api and enpoints and processes the selection
-                // let api = await environment.get("api_token");
+                // let api = await environment.get("api_token", "");
                 smartPointRemoval.setToken(apiCheck);
                 return await smartPointRemoval.processData().catch(error => document.body.appendChild(createAlert(error)).showModal());
 
@@ -237,17 +239,18 @@ async function apiCheckTangencies() {
         document.body.appendChild(createAlert("Oh no! You haven't selected anything.")).showModal();
     } else {
 
-        const size = calculatePaths();
+        const size = calculcatePathsAndPoints();
         if (size) {
-            const apiCheck = await environment.get("api_token");
+            const apiCheck = await environment.get("api_token", "");
+            
             tangencies.setEndpoint(await tangenciesEndpoint);
             if ((apiCheck == "") || (apiCheck == "reasonCanceled")) {
-                return createApiDialogue().then(data => tangencies.setToken(data))
+                return await createApiDialogue().then(data => tangencies.setToken(data))
                     .then(data => tangencies.processData())
                     .catch(error => document.body.appendChild(createAlert(error)).showModal());
             } else {
                 //sets the api and enpoints and processes the selection
-                console.log(apiCheck);
+      
                 tangencies.setToken(apiCheck);
                 return await tangencies.processData().catch(error => document.body.appendChild(createAlert(error)).showModal());
 
@@ -266,19 +269,19 @@ async function apiCheckStroke() {
         document.body.appendChild(createAlert("Oh no! You haven't selected anything.")).showModal();
     } else {
 
-        const size = calculatePaths();
+        const size = calculcatePaths();
         if (size) {
             strokeOutline.setEndpoint(await outline);
             //sets the api and enpoints and processes the selection
-            const apiCheck = await environment.get("api_token");
+            const apiCheck = await environment.get("api_token", "");
             if ((apiCheck == "") || (apiCheck == "reasonCanceled")) {
-                return createApiDialogue().then(data => strokeOutline.setToken(data))
+                return await createApiDialogue().then(data => strokeOutline.setToken(data))
                     .then(data => strokeOutline.processData())
                     .catch(error => document.body.appendChild(createAlert(error)).showModal());
             } else {
                 console.log(apiCheck);
                 strokeOutline.setToken(apiCheck);
-                return await strokeOutline.processData().catch(error => console.log(error));
+                return await strokeOutline.processData().catch(error => document.body.appendChild(createAlert(error)).showModal());
             }
         }
 
@@ -295,19 +298,19 @@ async function apiCheckOffset() {
         document.body.appendChild(createAlert("Oh no! You haven't selected anything.")).showModal();
     } else {
 
-        const size = calculatePaths();
+        const size = calculcatePathsAndPoints();
         if (size) {
             //sets the api and enpoints and processes the selection
-            const apiCheck = await environment.get("api_token");
+            const apiCheck = await environment.get("api_token", "");
             offsetPath.setEndpoint(await offset);
 
             if ((apiCheck == "") || (apiCheck == "reasonCanceled")) {
-                return createApiDialogue().then(data => offsetPath.setToken(data))
+                return await createApiDialogue().then(data => offsetPath.setToken(data))
                     .then(data => offsetPath.processData())
                     .catch(error => document.body.appendChild(createAlert(error)).showModal());
             } else {
                 offsetPath.setToken(apiCheck);
-                return await offsetPath.processData().catch(error => console.log(error));
+                return await offsetPath.processData().catch(error => document.body.appendChild(createAlert(error)).showModal());
             }
         }
     }
@@ -316,17 +319,61 @@ async function apiCheckOffset() {
 /**
  * Calculating the paths and points, and letting the user know if cannot process
  */
-function calculatePaths() {
+function calculcatePathsAndPoints() {
 
-    const selectedGrid = selection.items;
+    if (selection.items.length > 1) {
+        let rand;
+        do {
+            commands.ungroup();
+            commands.convertToPath();
+            rand++;
+        } while (rand < 4);
+    } else {
+
+        commands.ungroup();
+        commands.convertToPath();
+    }
+
     let pointTotal = 0;
-    selectedGrid.forEach(element => {
-        const points = svgHelper.getPointsArray(element.pathData);
+  
+
+    selection.items.forEach(function (childNode, i) {
+        const points = svgHelper.getPointsArray(childNode.pathData);
 
         pointTotal += points.length;
     });
-    if ((selectedGrid.length >= 160) || (pointTotal >= 5292)) {
-        document.body.appendChild(createAlert("File's too big. You have " + selectedGrid.length + " paths and " + pointTotal + " points. We accept up to 160 paths and 5292 points")).showModal();
+ 
+    if ((selection.items.length >= 160) || (pointTotal >= 5292)) {
+        document.body.appendChild(createAlert("File's too big. You have " + selection.items.length + " paths and " + pointTotal + " points. We accept up to 160 paths and 5292 points")).showModal();
+        return false;
+    } else {
+        return true;
+    }
+
+}
+
+/**
+ * Calculating the paths  and letting the user know if cannot process
+ */
+function calculcatePaths() {
+
+   
+    if (selection.items.length > 1) {
+        let rand;
+        do {
+            commands.ungroup();
+            rand++;
+        } while (rand < 4);
+    } else {
+
+        commands.ungroup();
+    }
+
+    let pointTotal = 0;
+  
+
+    if ((selection.items.length >= 160) || (pointTotal >= 5292)) {
+        document.body.appendChild(createAlert("File's too big. You have " + selection.items.length + " paths. We accept up to 160")).showModal();
         return false;
     } else {
         return true;
