@@ -23,15 +23,19 @@ Each operation has been extracted into their own module.
 
 **Outline Strokes** - creates paths out of strokes on the selection.
 
+**Please remember that the code contains examples**
+The plugin showcases **two** ways of building UI components in **Adobe XD**, covering all the basics.
+
 
 ## Obtaining the API token
 
-Register and log-in to [Astui](https://astui.tech/). Click on the **API** submenu. Create your token. Keep it safe. 
+Register and log-in to [Astui](https://astui.tech/). Click on the **API** sub-menu. Create your token. Keep it safe. 
 The last token is also available on [Astui Setting's Page](https://astui.tech/settings) when you're logged in.
 
 
-## Dependencies
+## Dependencies and Credit
 
 [XD-Storage-Helper](https://github.com/pklaschka/xd-storage-helper) is used to manage the settings file.
 
 
+Enjoy :D
