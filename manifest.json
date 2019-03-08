@@ -1,41 +1,85 @@
 {
     "id": "8a99fe4d",
     "name": "Astui",
-    "description": "Astui",
-    "icons": [{
-        "width": 80,
-        "height": 80,
-        "path": "images/icon.png"
-    }],
-    "version": "1.2.4",
+    "description": "Make XD more creative! Powered by Astute Graphics' technology at the core of the leading plugins for Adobe Illustrator. Vector design and control functions included: Outline Stroke, Offset Path,mart Point Removal (reduce file artwork / SVG file size and make imported artwork humanly editable) Move Points to Tangencies. Requires an Astui account available from https://astui.tech - with an initial free period",
+    "summary": "Add essential vector control",
+    "releaseNotes": "v1.2.5 changes: Improved grouped artwork handling. Addition of keyboard shortcuts (macOS / Windows): Smart Point Remove: CMD + SHIFT + X / CTRL + SHIFT + X, Offset Path: CMD + SHIFT + F / CTRL + SHIFT + F, Outline Stroke (Border): CMD + ALT + SHIFT + O / CTRL + ALT + SHIFT + O",
+    "keywords": [
+        "optimise",
+        "optimize",
+        "vector",
+        "path",
+        "point",
+        "remove",
+        "reduce",
+        "offset",
+        "parallel",
+        "outline",
+        "expand",
+        "border",
+        "stroke"
+    ],
+    "languages": [
+        "en"
+    ],
+    "website": "https://astui.tech/",
+    "author": "Astute Graphics",
+    "helpUrl": "https://astui.tech/",
+    "icons": [
+        { "width": 48, "height": 48, "path": "images/astui_xd_icon_1x.png" },
+        { "width": 96, "height": 96, "path": "images/astui_xd_icon_2x.png" },
+        { "width": 144, "height": 144, "path": "images/astui_xd_icon_3x.png" },
+        { "width": 192, "height": 192, "path": "images/astui_xd_icon_4x.png" }
+    ],
+    "version": "1.2.5",
     "host": {
         "app": "XD",
-        "minVersion": "8.0"
+        "minVersion": "15.0"
     },
     "uiEntryPoints": [{
         "type": "menu",
         "label": "Astui",
         "menuItems": [{
                 "type": "menu",
-                "label": "Smart Point Remove",
-                "commandId": "optionLoad"
+                "label": {
+                    "default": "Smart Point Remove"
+                },
+                "commandId": "optionLoad",
+                "shortcut": {
+                    "mac": "Cmd+Shift+X",
+                    "win": "Ctrl+Shift+X"
+                }
             },
             {
                 "type": "menu",
-                "label": "Move Points to Tangencies",
+                "label": {
+                    "default": "Move Points to Tangencies"
+                },
                 "commandId": "moveTangencies"
             },
             {
                 "type": "menu",
-                "label": "Offset Path",
-                "commandId": "offsetPath"
+                "label": {
+                    "default": "Offset Path"
+                },
+                "commandId": "offsetPath",
+                "shortcut": {
+                    "mac": "Cmd+Shift+F",
+                    "win": "Ctrl+Shift+F"
+                }
             },
             {
                 "type": "menu",
-                "label": "Outline Stroke",
-                "commandId": "outlineStroke"
+                "label": {
+                    "default": "Outline Stroke (Border)"
+                },
+                "commandId": "outlineStroke",
+                "shortcut": {
+                    "mac": "Cmd+Alt+Shift+O",
+                    "win": "Ctrl+Alt+Shift+O"
+                }
             }
-            
+
         ]
     }]
 
