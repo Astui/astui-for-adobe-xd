@@ -9,27 +9,33 @@ const smartPointRemoval = require("./lib/smart-point-removal");
 const tangencies = require("./lib/tangencies");
 const strokeOutline = require("./lib/outline");
 const offsetPath = require("./lib/offset");
+const roundCorners = require("./lib/round-corners");
+const removeCorners = require("./lib/remove-corners");
+const calligraphicBrush = require("./lib/calligraphic-brush");
 
-//setting/creating new api file
 
 
 
 const $ = sel => document.querySelector(sel);
-//alert message warning the user that nothing is selected.
+
 let alertMessage;
 
 /**
  * @NOTE: API RELATED 
  */
-
-//setting endpoints
+ 
 const spr = gettingEndpoints("spr");
 const tangenciesEndpoint = gettingEndpoints("tangencies");
 const validate = gettingEndpoints("validate");
 const outline = gettingEndpoints("outline");
 const offset = gettingEndpoints("offset");
+const roundedApi = gettingEndpoints("rounded");
+const remove = gettingEndpoints("removerounded");
+const calligraphic = gettingEndpoints("calligraphic");
+
 /**
- * Getting the settings
+ * Getting the endpoint from the settings file
+ * Or creating the file if no file is created with the base url
  * @param {string} operation 
  */
 async function gettingEndpoints(operation) {
@@ -38,13 +44,12 @@ async function gettingEndpoints(operation) {
 }
 
 /**
- * ESSENTIAL CALL TO THE API
- * This checks the validity of the api token passed through
+ * Validation request
+ * Server request to validate endpoint, validating the token that is sent with it
  * 
- * @param {} token - string
+ * @param {} token - string user specified token
  */
 async function checkAuth(token) {
-    //doesn"t handle any errors, handled by the dialogue.
     const authentication = await fetch(await validate, {
         method: "post",
         headers: {
@@ -61,7 +66,9 @@ async function checkAuth(token) {
 }
 
 /**
- * Creating a modal dialog and setting the inserting api token into the file defined above
+ * Creates modal that prompts user to insert their API token,
+ * the token is verified and if valid, the prompt closes and passes the token to env variable to set.
+ * When the token is invalid or empty, the prompt displays an error until the user dismisses or puts in a valid token
  *
  * @param {Creating a} id
  * @return the api token
@@ -145,19 +152,15 @@ function insertApiKey(id = "api") {
     return apiInput;
 }
 
-
-
-
-
 /**
- * Creating and alert message that nothing is selected.
- *  This uses JS instead of HTML injection
+ * Creates the generic error dialog that is used throughout this file
+ * 
+ * @param error - string, the error that is displayed
  */
 function createAlert(error) {
     if (alertMessage == null) {
-        //create the bar
+        
         alertMessage = document.createElement("dialog");
-        //create content with h1 element
         const text = document.createElement("h1");
         text.textContent = "Alert!";
         alertMessage.appendChild(text);
@@ -168,7 +171,6 @@ function createAlert(error) {
         alertMessage.appendChild(message);
         let footer = document.createElement("footer");
         alertMessage.appendChild(footer);
-        //  include at least one way to close the dialog
         let closeButton = document.createElement("button");
         closeButton.uxpVariant = "cta";
         closeButton.textContent = "Got It!";
@@ -183,13 +185,13 @@ function createAlert(error) {
 
 
 /**
- * checking the need to create the api dialogue and if nothing is set doesn"t allow further processes to show
- * @param {*} selection 
+ * Instantiates the API Token dialog and gets its return,
+ * This is then set as the token in our settings file, only of there is a token to insert.
+ * Dismissal of the dialog brings up an error.
  */
 async function createApiDialogue() {
     const dialog = insertApiKey();
 
-    //waiting for the dialog to close and provide with accuracy value if said is set
     const r = await dialog.showModal();
     if ((r !== "") && (r !== "reasonCanceled")) {
         await environment.set("api_token", r);
@@ -201,28 +203,26 @@ async function createApiDialogue() {
 
 
 /**
- * Call to Smart Point Removal module
+ * Call to Smart Point Removal module, but before preforming operations, it checks whether the artwork is selected and if it's too big, ensuring the plugin operates smoothly. If everything is fine,
+ * the method checks for an API token, so that the user doesn't have to input it every time an operation is run. The user gets prompted with an "insert API token" dialog if the file is empty.
+ * If there are errors with the request or something else with the artwork, the user is prompted with the error message and operations are stopped.
  */
 async function apiCheckSpr() {
 
-    //displays warning when nothing is selected
     if (selection.items[0] == null) {
         document.body.appendChild(createAlert("Oh no! You haven't selected anything.")).showModal();
     } else {
-        const size = calculcatePathsAndPoints();
+        const size = calculatePaths();
         if (size) {
-            const apiCheck = await environment.get("api_token","");
+            const apiCheck = await environment.get("api_token");
             smartPointRemoval.setEndpoint(await spr);
-          
-            if ((apiCheck == "") || (apiCheck == "reasonCanceled")) {
 
-                return await createApiDialogue().then(data => smartPointRemoval.setToken(data))
+            if ((apiCheck == "") || (apiCheck == "reasonCanceled")) {
+                return createApiDialogue().then(data => smartPointRemoval.setToken(data))
                     .then(data => smartPointRemoval.processData())
                     .catch(error => document.body.appendChild(createAlert(error)).showModal());
             } else {
-                
-                //sets the api and enpoints and processes the selection
-                // let api = await environment.get("api_token", "");
+
                 smartPointRemoval.setToken(apiCheck);
                 return await smartPointRemoval.processData().catch(error => document.body.appendChild(createAlert(error)).showModal());
 
@@ -232,25 +232,26 @@ async function apiCheckSpr() {
 }
 
 /**
- * Call to tangencies module
+ * Call to tangencies module, but before preforming operations, it checks whether the artwork is selected and if it's too big, ensuring the plugin operates smoothly. If everything is fine,
+ * the method checks for an API token, so that the user doesn't have to input it every time an operation is run. The user gets prompted with an "insert API token" dialog if the file is empty.
+ * If there are errors with the request or something else with the artwork, the user is prompted with the error message and operations are stopped.
  */
 async function apiCheckTangencies() {
     if (selection.items[0] == null) {
         document.body.appendChild(createAlert("Oh no! You haven't selected anything.")).showModal();
     } else {
 
-        const size = calculcatePathsAndPoints();
+        const size = calculatePaths();
         if (size) {
-            const apiCheck = await environment.get("api_token", "");
-            
+            const apiCheck = await environment.get("api_token");
             tangencies.setEndpoint(await tangenciesEndpoint);
             if ((apiCheck == "") || (apiCheck == "reasonCanceled")) {
-                return await createApiDialogue().then(data => tangencies.setToken(data))
+                return createApiDialogue().then(data => tangencies.setToken(data))
                     .then(data => tangencies.processData())
                     .catch(error => document.body.appendChild(createAlert(error)).showModal());
             } else {
                 //sets the api and enpoints and processes the selection
-      
+
                 tangencies.setToken(apiCheck);
                 return await tangencies.processData().catch(error => document.body.appendChild(createAlert(error)).showModal());
 
@@ -261,7 +262,9 @@ async function apiCheckTangencies() {
 }
 
 /**
- * Call to Outline Stroke module
+ * Call to Outline Stroke module, but before preforming operations, it checks whether the artwork is selected and if it's too big, ensuring the plugin operates smoothly. If everything is fine,
+ * the method checks for an API token, so that the user doesn't have to input it every time an operation is run. The user gets prompted with an "insert API token" dialog if the file is empty.
+ * If there are errors with the request or something else with the artwork, the user is prompted with the error message and operations are stopped.
  * 
  */
 async function apiCheckStroke() {
@@ -269,17 +272,15 @@ async function apiCheckStroke() {
         document.body.appendChild(createAlert("Oh no! You haven't selected anything.")).showModal();
     } else {
 
-        const size = calculcatePaths();
+        const size = calculatePaths();
         if (size) {
             strokeOutline.setEndpoint(await outline);
-            //sets the api and enpoints and processes the selection
-            const apiCheck = await environment.get("api_token", "");
+            const apiCheck = await environment.get("api_token");
             if ((apiCheck == "") || (apiCheck == "reasonCanceled")) {
-                return await createApiDialogue().then(data => strokeOutline.setToken(data))
+                return createApiDialogue().then(data => strokeOutline.setToken(data))
                     .then(data => strokeOutline.processData())
                     .catch(error => document.body.appendChild(createAlert(error)).showModal());
             } else {
-                console.log(apiCheck);
                 strokeOutline.setToken(apiCheck);
                 return await strokeOutline.processData().catch(error => document.body.appendChild(createAlert(error)).showModal());
             }
@@ -289,23 +290,22 @@ async function apiCheckStroke() {
 }
 
 /**
- * Calls to Offset module
- * 
- * @param {*} selection 
+ * Calls to Offset module, but before preforming operations, it checks whether the artwork is selected and if it's too big, ensuring the plugin operates smoothly. If everything is fine,
+ * the method checks for an API token, so that the user doesn't have to input it every time an operation is run. The user gets prompted with an "insert API token" dialog if the file is empty.
+ * If there are errors with the request or something else with the artwork, the user is prompted with the error message and operations are stopped.
  */
 async function apiCheckOffset() {
     if (selection.items[0] == null) {
         document.body.appendChild(createAlert("Oh no! You haven't selected anything.")).showModal();
     } else {
 
-        const size = calculcatePathsAndPoints();
+        const size = calculatePaths();
         if (size) {
-            //sets the api and enpoints and processes the selection
-            const apiCheck = await environment.get("api_token", "");
+            const apiCheck = await environment.get("api_token");
             offsetPath.setEndpoint(await offset);
 
             if ((apiCheck == "") || (apiCheck == "reasonCanceled")) {
-                return await createApiDialogue().then(data => offsetPath.setToken(data))
+                return createApiDialogue().then(data => offsetPath.setToken(data))
                     .then(data => offsetPath.processData())
                     .catch(error => document.body.appendChild(createAlert(error)).showModal());
             } else {
@@ -317,67 +317,132 @@ async function apiCheckOffset() {
 }
 
 /**
- * Calculating the paths and points, and letting the user know if cannot process
+ * Calls Rounded Corners, but before it can be processed checking the artwork if it's too big, then checks whether the user has previously set API token.
+ * If artwork is fine and the token is fine, processes further, if there are errors (unauthorised, artwork too big, server time out) the user is prompted with the error message 
+ * and no alterations are done in the artwork. 
  */
-function calculcatePathsAndPoints() {
+async function apiRoundCorner() {
+    if (selection.items[0] == null) {
+        document.body.appendChild(createAlert("Oh no! You haven't selected anything.")).showModal();
+    } else {
 
-    if (selection.items.length > 1) {
+        const size = calculatePaths();
+        if (size) {
+            const apiCheck = await environment.get("api_token");
+            roundCorners.setEndpoint(await roundedApi);
+
+            if ((apiCheck == "") || (apiCheck == "reasonCanceled")) {
+                return createApiDialogue().then(data => roundCorners.setToken(data))
+                    .then(data => roundCorners.processData())
+                    .catch(error => document.body.appendChild(createAlert(error)).showModal());
+            } else {
+                roundCorners.setToken(apiCheck);
+                return await roundCorners.processData().catch(error => document.body.appendChild(createAlert(error)).showModal());
+            }
+        }
+    }
+}
+
+/**
+ * Calls Remove Rounded Corners, but before it can be processed checking the artwork if it's too big, then checks whether the user has previously set API token.
+ * If artwork is fine and the token is fine, processes further, if artwork too big - errors and cancels processing, if unauthorised - asks for a token and after verification proceeds.
+ */
+async function apiRemoveRounded() {
+    if (selection.items[0] == null) {
+        document.body.appendChild(createAlert("Oh no! You haven't selected anything.")).showModal();
+    } else {
+        const size = calculatePaths();
+        if (size) {
+            const apiCheck = await environment.get("api_token");
+
+            removeCorners.setEndpoint(await remove);
+            if ((apiCheck == "") || (apiCheck == "reasonCanceled")) {
+                return createApiDialogue().then(data => removeCorners.setToken(data))
+                    .then(data => removeCorners.processData())
+                    .catch(error => document.body.appendChild(createAlert(error)).showModal());
+            } else {
+                //sets the api and enpoints and processes the selection
+                removeCorners.setToken(apiCheck);
+                return await removeCorners.processData().catch(error => document.body.appendChild(createAlert(error)).showModal());
+
+            }
+        }
+    }
+}
+
+/**
+ * Calls Calligraphic brush, but before it can be processed checking the artwork if it's too big, then checks whether the user has previously set API token.
+ * If artwork is fine and the token is fine, processes further, if artwork too big - errors and cancels processing, if unauthorised = asks for a token and after verification proceeds.
+ */
+async function apiCalligraphicBrush() {
+    if (selection.items[0] == null) {
+        document.body.appendChild(createAlert("Oh no! You haven't selected anything.")).showModal();
+    } else {
+
+        const size = calculatePaths();
+        if (size) {
+            const apiCheck = await environment.get("api_token");
+            calligraphicBrush.setEndpoint(await calligraphic);
+
+            if ((apiCheck == "") || (apiCheck == "reasonCanceled")) {
+                return createApiDialogue().then(data => calligraphicBrush.setToken(data))
+                    .then(data => calligraphicBrush.processData())
+                    .catch(error => document.body.appendChild(createAlert(error)).showModal());
+            } else {
+                calligraphicBrush.setToken(apiCheck);
+                return await calligraphicBrush.processData().catch(error => document.body.appendChild(createAlert(error)).showModal());
+            }
+        }
+    }
+}
+
+/**
+ *  Ungroups symbols and paths, converts them into instances of Path object, to get the data for the API calls
+ *  where each object has a path (Path.pathData)
+ */
+function ungroupPaths() {
+
+    const selectedGrid = selection.items;
+
+    if (selectedGrid.length > 1) {
         let rand;
         do {
             commands.ungroup();
             commands.convertToPath();
             rand++;
+
         } while (rand < 4);
+
     } else {
 
         commands.ungroup();
         commands.convertToPath();
     }
-
-    let pointTotal = 0;
-  
-
-    selection.items.forEach(function (childNode, i) {
-        const points = svgHelper.getPointsArray(childNode.pathData);
-
-        pointTotal += points.length;
-    });
- 
-    if ((selection.items.length >= 160) || (pointTotal >= 5292)) {
-        document.body.appendChild(createAlert("File's too big. You have " + selection.items.length + " paths and " + pointTotal + " points. We accept up to 160 paths and 5292 points")).showModal();
-        return false;
-    } else {
-        return true;
-    }
+    return true; 
 
 }
 
-/**
- * Calculating the paths  and letting the user know if cannot process
+/*
+ * Calculating the paths and points, and letting the user know if cannot process
  */
-function calculcatePaths() {
+function calculatePaths() {
+    let paths  = ungroupPaths();
+    console.log(paths);
+    if (paths) {
+        const selectedGrid = selection.items;
+        let pointTotal = 0;
+    selectedGrid.forEach(element => {
+        const points = svgHelper.getPointsArray(element.pathData);
 
-   
-    if (selection.items.length > 1) {
-        let rand;
-        do {
-            commands.ungroup();
-            rand++;
-        } while (rand < 4);
-    } else {
-
-        commands.ungroup();
-    }
-
-    let pointTotal = 0;
-  
-
-    if ((selection.items.length >= 160) || (pointTotal >= 5292)) {
-        document.body.appendChild(createAlert("File's too big. You have " + selection.items.length + " paths. We accept up to 160")).showModal();
+        pointTotal += points.length;
+    });
+    if ((selectedGrid.length >= 160) || (pointTotal >= 5292)) {
+        document.body.appendChild(createAlert("File's too big. You have " + selectedGrid.length + " paths and " + pointTotal + " points. We accept up to 160 paths and 5292 points")).showModal();
         return false;
     } else {
         return true;
     }
+}
 
 }
 module.exports = {
@@ -386,5 +451,8 @@ module.exports = {
         moveTangencies: apiCheckTangencies,
         outlineStroke: apiCheckStroke,
         offsetPath: apiCheckOffset,
+        roundCorner: apiRoundCorner,
+        removeRoundedCorners: apiRemoveRounded,
+        calligraphicBrush: apiCalligraphicBrush,
     }
 }

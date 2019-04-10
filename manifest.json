@@ -1,9 +1,9 @@
 {
     "id": "8a99fe4d",
     "name": "Astui",
-    "description": "Make XD more creative! Powered by Astute Graphics' technology at the core of the leading plugins for Adobe Illustrator. Vector design and control functions included: Outline Stroke, Offset Path,mart Point Removal (reduce file artwork / SVG file size and make imported artwork humanly editable) Move Points to Tangencies. Requires an Astui account available from https://astui.tech - with an initial free period",
+    "description": "Make XD more creative! Powered by Astute Graphics' technology at the core of the leading plugins for Adobe Illustrator. Vector design and control functions included: * NEW Rounded Corners (add and remove to any path), * NEW: Calligraphic Brush, * Outline Stroke, * Offset Path, * Smart Point Removal (reduce file artwork / SVG file size and make imported artwork humanly editable) * Move Points to Tangencies. Requires an Astui account available from https://astui.tech - with an initial free period",
     "summary": "Add essential vector control",
-    "releaseNotes": "v1.2.5 changes: Improved grouped artwork handling. Addition of keyboard shortcuts (macOS / Windows): Smart Point Remove: CMD + SHIFT + X / CTRL + SHIFT + X, Offset Path: CMD + SHIFT + F / CTRL + SHIFT + F, Outline Stroke (Border): CMD + ALT + SHIFT + O / CTRL + ALT + SHIFT + O",
+    "releaseNotes": "v.1.3.0 Rounded Corners and Calligraphic Brush added, Key shortcuts added, Requires Adobe XD v18",
     "keywords": [
         "optimise",
         "optimize",
@@ -17,7 +17,8 @@
         "outline",
         "expand",
         "border",
-        "stroke"
+        "stroke",
+        "calligraphy"
     ],
     "languages": [
         "en"
@@ -31,10 +32,10 @@
         { "width": 144, "height": 144, "path": "images/astui_xd_icon_3x.png" },
         { "width": 192, "height": 192, "path": "images/astui_xd_icon_4x.png" }
     ],
-    "version": "1.2.5",
-    "host": {
+    "version": "1.3.0",
+     "host": {
         "app": "XD",
-        "minVersion": "15.0"
+        "minVersion": "18.0"
     },
     "uiEntryPoints": [{
         "type": "menu",
@@ -78,8 +79,31 @@
                     "mac": "Cmd+Alt+Shift+O",
                     "win": "Ctrl+Alt+Shift+O"
                 }
+            },
+            {
+                "type": "menu",
+                "label": "Round Corners",
+                "commandId": "roundCorner",
+                "shortcut": {
+                    "mac": "Cmd+Alt+C",
+                    "win": "Ctrl+Alt+C"
+                }
+            },
+            {
+                "type": "menu",
+                "label": "Remove Rounded Corners",
+                "commandId": "removeRoundedCorners",
+                "shortcut": {
+                    "mac": "Cmd+Alt+Shift+C",
+                    "win": "Ctrl+Alt+Shift+C"
+                }
+            },
+            {
+                "type": "menu",
+                "label": "Calligraphic Brush",
+                "commandId": "calligraphicBrush"
             }
-
+            
         ]
     }]
 
