@@ -3,7 +3,7 @@
     "name": "Astui",
     "description": "Make XD more creative! Powered by Astute Graphics' technology at the core of the leading plugins for Adobe Illustrator. Vector design and control functions included: * Rounded Corners (add and remove to any path), * Calligraphic Brush, * NEW Repeat Outline Stroke , * Offset Path, * Smart Point Removal (reduce file artwork / SVG file size and make imported artwork humanly editable) * Move Points to Tangencies, NEW Long Shadow. Requires an Astui account available from https://astui.tech - with an initial free period",
     "summary": "Add essential vector control",
-    "releaseNotes": "v1.4.4 changes : Long Shadow added, Offset Path additional repeat options added, Key shortcuts updated, Minor bug fixes, Requires Adobe XD v18",
+    "releaseNotes": "v1.4.6 changes : Long Shadow added, Offset Path additional repeat options added, Key shortcuts updated, Minor bug fixes, Requires Adobe XD v18, Better translation of rotated paths",
     "keywords": [
         "optimise",
         "optimize",
@@ -32,7 +32,7 @@
         { "width": 144, "height": 144, "path": "images/astui_xd_icon_3x.png" },
         { "width": 192, "height": 192, "path": "images/astui_xd_icon_4x.png" }
     ],
-    "version": "1.4.5",
+    "version": "1.4.6",
      "host": {
         "app": "XD",
         "minVersion": "18.0"

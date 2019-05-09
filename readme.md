@@ -10,6 +10,16 @@
 
 Find our plugin in **Plugins -> Discover -> Astui**
 
+##New features🎉
+* Offset of multiple paths with different easing 🎉
+* Long Shadow 🎉
+* Recipes module to utilise recipes feature of [Astui API](http://astui.tech/docs/api/#recipes) 🎉
+
+##Bug Fixes 🐜
+* Outline of rotated objects
+* Offset of rotated objects
+* UI inconsistencies
+
 ## Usage
 Documentation for the API itself - [Astui API Documentation](http://astui.tech/docs/api/#introduction)
 
@@ -19,7 +29,8 @@ Each operation has been extracted into their own module.
 
 **Move Points To Tangencies** - moves points by 90°.
 
-**Offset Paths** - allows to offset paths but offset limit and the path type, as well as keeping the original path on the screen. _More information to come_
+**Offset Paths** - allows to offset paths but offset limit and the path type, as well as keeping the original path on the screen.
+Multiple paths offset with different easing, colors and transparency options.
 
 **Outline Strokes** - creates paths out of strokes on the selection.
 
@@ -28,6 +39,8 @@ Each operation has been extracted into their own module.
 **Remove Rounded Corners** - remove round corners from shapes and paths.
 
 **Calligraphic Brush** - apply Calligraphy effect to any paths.
+
+**Long Shadow** - add a long shadow to any path or shape, outline the shape if an outlined shadow is required.
 
 **Please remember that the code contains examples**
 The plugin showcases **two** ways of building UI components in **Adobe XD**, covering all the basics.
