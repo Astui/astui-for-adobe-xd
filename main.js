@@ -12,7 +12,7 @@ const offsetPath = require("./lib/offset");
 const roundCorners = require("./lib/round-corners");
 const removeCorners = require("./lib/remove-corners");
 const calligraphicBrush = require("./lib/calligraphic-brush");
-
+const longShadow = require("./lib/long-shadows");
 
 
 
@@ -32,7 +32,7 @@ const offset = gettingEndpoints("offset");
 const roundedApi = gettingEndpoints("rounded");
 const remove = gettingEndpoints("removerounded");
 const calligraphic = gettingEndpoints("calligraphic");
-
+const longShadowEndpoint = gettingEndpoints("longshadow");
 /**
  * Getting the endpoint from the settings file
  * Or creating the file if no file is created with the base url
@@ -40,6 +40,7 @@ const calligraphic = gettingEndpoints("calligraphic");
  */
 async function gettingEndpoints(operation) {
     const url = await environment.get("server", "https://astui.tech/api/v1/");
+    await environment.get("api_token", "");
     return url + operation;
 }
 
@@ -128,9 +129,11 @@ function insertApiKey(id = "api") {
                 } else {
 
                     error.textContent = "Sorry, Astui API token invalid.";
+                    token.value = "";
                 }
             }).catch(function (err) {
                 err.textContent = "";
+                token.value = "";
                 return apiInput.close(token.value);
             });
 
@@ -216,8 +219,7 @@ async function apiCheckSpr() {
         if (size) {
             const apiCheck = await environment.get("api_token");
             smartPointRemoval.setEndpoint(await spr);
-
-            if ((apiCheck == "") || (apiCheck == "reasonCanceled")) {
+            if ((!apiCheck) || (apiCheck == "reasonCanceled") ) {
                 return createApiDialogue().then(data => smartPointRemoval.setToken(data))
                     .then(data => smartPointRemoval.processData())
                     .catch(error => document.body.appendChild(createAlert(error)).showModal());
@@ -245,7 +247,7 @@ async function apiCheckTangencies() {
         if (size) {
             const apiCheck = await environment.get("api_token");
             tangencies.setEndpoint(await tangenciesEndpoint);
-            if ((apiCheck == "") || (apiCheck == "reasonCanceled")) {
+            if ((!apiCheck) || (apiCheck == "reasonCanceled")) {
                 return createApiDialogue().then(data => tangencies.setToken(data))
                     .then(data => tangencies.processData())
                     .catch(error => document.body.appendChild(createAlert(error)).showModal());
@@ -276,7 +278,7 @@ async function apiCheckStroke() {
         if (size) {
             strokeOutline.setEndpoint(await outline);
             const apiCheck = await environment.get("api_token");
-            if ((apiCheck == "") || (apiCheck == "reasonCanceled")) {
+            if ((!apiCheck) || (apiCheck == "reasonCanceled")) {
                 return createApiDialogue().then(data => strokeOutline.setToken(data))
                     .then(data => strokeOutline.processData())
                     .catch(error => document.body.appendChild(createAlert(error)).showModal());
@@ -301,10 +303,10 @@ async function apiCheckOffset() {
 
         const size = calculatePaths();
         if (size) {
-            const apiCheck = await environment.get("api_token");
-            offsetPath.setEndpoint(await offset);
 
-            if ((apiCheck == "") || (apiCheck == "reasonCanceled")) {
+            offsetPath.setEndpoint(await offset);
+            const apiCheck = await environment.get("api_token");
+            if ((!apiCheck) || (apiCheck == "reasonCanceled")) {
                 return createApiDialogue().then(data => offsetPath.setToken(data))
                     .then(data => offsetPath.processData())
                     .catch(error => document.body.appendChild(createAlert(error)).showModal());
@@ -328,10 +330,11 @@ async function apiRoundCorner() {
 
         const size = calculatePaths();
         if (size) {
-            const apiCheck = await environment.get("api_token");
             roundCorners.setEndpoint(await roundedApi);
+            const apiCheck = await environment.get("api_token");
+            
 
-            if ((apiCheck == "") || (apiCheck == "reasonCanceled")) {
+            if ((!apiCheck) || (apiCheck == "reasonCanceled")) {
                 return createApiDialogue().then(data => roundCorners.setToken(data))
                     .then(data => roundCorners.processData())
                     .catch(error => document.body.appendChild(createAlert(error)).showModal());
@@ -356,7 +359,7 @@ async function apiRemoveRounded() {
             const apiCheck = await environment.get("api_token");
 
             removeCorners.setEndpoint(await remove);
-            if ((apiCheck == "") || (apiCheck == "reasonCanceled")) {
+            if ((!apiCheck) || (apiCheck == "reasonCanceled")) {
                 return createApiDialogue().then(data => removeCorners.setToken(data))
                     .then(data => removeCorners.processData())
                     .catch(error => document.body.appendChild(createAlert(error)).showModal());
@@ -384,7 +387,7 @@ async function apiCalligraphicBrush() {
             const apiCheck = await environment.get("api_token");
             calligraphicBrush.setEndpoint(await calligraphic);
 
-            if ((apiCheck == "") || (apiCheck == "reasonCanceled")) {
+            if ((!apiCheck) || (apiCheck == "reasonCanceled")) {
                 return createApiDialogue().then(data => calligraphicBrush.setToken(data))
                     .then(data => calligraphicBrush.processData())
                     .catch(error => document.body.appendChild(createAlert(error)).showModal());
@@ -397,15 +400,38 @@ async function apiCalligraphicBrush() {
 }
 
 /**
+ * Calls Long Shadow, but before it can be processed checking the artwork if it's too big, then checks whether the user has previously set API token.
+ * If artwork is fine and the token is fine, processes further, if artwork too big - errors and cancels processing, if unauthorised = asks for a token and after verification proceeds.
+ */
+async function apiLongShadow() {
+    if (selection.items[0] == null) {
+        document.body.appendChild(createAlert("Oh no! You haven't selected anything.")).showModal();
+    } else {
+
+        const size = calculatePaths();
+        if (size) {
+            const apiCheck = await environment.get("api_token");
+            longShadow.setEndpoint(await longShadowEndpoint);
+
+            if ((!apiCheck) || (apiCheck == "reasonCanceled")) {
+                return createApiDialogue().then(data => longShadow.setToken(data))
+                    .then(data => longShadow.processData())
+                    .catch(error => document.body.appendChild(createAlert(error)).showModal());
+            } else {
+                longShadow.setToken(apiCheck);
+                return await longShadow.processData().catch(error => document.body.appendChild(createAlert(error)).showModal());
+            }
+        }
+    }
+}
+
+/**
  *  Ungroups symbols and paths, converts them into instances of Path object, to get the data for the API calls
  *  where each object has a path (Path.pathData)
  */
 function ungroupPaths() {
 
-    const selectedGrid = selection.items;
-
-    if (selectedGrid.length > 1) {
-        let rand;
+        let rand = 0;
         do {
             commands.ungroup();
             commands.convertToPath();
@@ -413,11 +439,6 @@ function ungroupPaths() {
 
         } while (rand < 4);
 
-    } else {
-
-        commands.ungroup();
-        commands.convertToPath();
-    }
     return true; 
 
 }
@@ -427,7 +448,6 @@ function ungroupPaths() {
  */
 function calculatePaths() {
     let paths  = ungroupPaths();
-    console.log(paths);
     if (paths) {
         const selectedGrid = selection.items;
         let pointTotal = 0;
@@ -454,5 +474,6 @@ module.exports = {
         roundCorner: apiRoundCorner,
         removeRoundedCorners: apiRemoveRounded,
         calligraphicBrush: apiCalligraphicBrush,
+        longShadow: apiLongShadow,
     }
 }
