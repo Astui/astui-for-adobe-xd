@@ -10,12 +10,12 @@
 
 Find our plugin in **Plugins -> Discover -> Astui**
 
-##New features🎉
+## New features🎉
 * Offset of multiple paths with different easing 🎉
 * Long Shadow 🎉
 * Recipes module to utilise recipes feature of [Astui API](http://astui.tech/docs/api/#recipes) 🎉
 
-##Bug Fixes 🐜
+## Bug Fixes 🐜
 * Outline of rotated objects
 * Offset of rotated objects
 * UI inconsistencies
